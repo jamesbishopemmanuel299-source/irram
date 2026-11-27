@@ -30,6 +30,7 @@ The live-chat API key is never placed in the browser or GitHub Pages output. Git
 Add these repository **Actions secrets** in Settings → Secrets and variables → Actions:
 
 - `OPENAI_API_KEY` — your OpenAI API key.
+- `DERIV_API_TOKEN` — your Deriv personal API token. Use read-only permissions only; do not grant trade or payment permissions.
 - `CLOUDFLARE_API_TOKEN` — Cloudflare API token with Workers Scripts edit permission.
 - `CLOUDFLARE_ACCOUNT_ID` — your Cloudflare account ID.
 
@@ -37,7 +38,7 @@ Add this repository **Actions variable** in the same page:
 
 - `IRRAM_CHAT_API_URL` — your deployed Worker URL, for example `https://irram-ai.YOUR-SUBDOMAIN.workers.dev` (no trailing slash).
 
-The workflow deploys `worker/irram-ai-worker.js` using `worker/wrangler.toml`, stores the OpenAI key as a Worker secret, generates the public endpoint configuration, and deploys GitHub Pages. If any required value is missing, deployment stops with a clear error. Never add the API key to `index.html`, `chat-config.js`, or any committed file.
+The workflow deploys `worker/irram-ai-worker.js` using `worker/wrangler.toml`, stores the OpenAI and Deriv keys as Worker secrets, generates the public endpoint configuration, and deploys GitHub Pages. The Deriv UI sends only the App ID and account ID to the Worker; the Worker uses `DERIV_API_TOKEN` to request the temporary WebSocket session. The token is never sent to the browser. If any required value is missing, deployment stops with a clear error. Never add the API key to `index.html`, `chat-config.js`, or any committed file.
 
 ## Connect a Deriv account (read-only)
 The dashboard includes an optional Deriv account connection for live account-balance monitoring. It uses Deriv's authenticated WebSocket OTP flow.
