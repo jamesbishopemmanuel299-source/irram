@@ -19,7 +19,8 @@ The site and its API run on the same Render service. The server serves the dashb
 
 - Responsive crypto market dashboard and watchlist.
 - AI market research chat through the server-side OpenAI API.
-- Deriv account balance connection using a temporary WebSocket OTP.
+- Live Deriv market chart with selectable active symbols, historical ticks, and real-time tick updates from Deriv's public WebSocket feed.
+- Deriv account balance connection using a temporary WebSocket OTP. The private token remains server-side; public market quotes do not require a token.
 - Paper trading, portfolio tracking, trade history and risk calculator.
 - Health endpoint at `/health`.
 
