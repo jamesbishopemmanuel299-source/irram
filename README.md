@@ -37,7 +37,7 @@ Open `http://localhost:10000`. Set `OPENAI_API_KEY` and `DERIV_API_TOKEN` in you
 
 - Never commit API keys or paste them into the website source.
 - Set secrets in Render → your service → Environment.
-- Use a Deriv read-only token. This integration only requests account balance and does not place trades.
+- Use a Deriv token with **read** permission only. The backend reads `DERIV_API_TOKEN` from Render's environment and uses it only to request a temporary session for account-balance viewing. There are no live buy, sell, contract, deposit or withdrawal API routes.
 - The dashboard's buy/sell controls are paper trades only.
 - Do not share your Render environment values publicly.
 
