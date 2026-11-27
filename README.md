@@ -1,52 +1,46 @@
 # IRRAM AI
 
-A responsive AI-assisted crypto research and paper-trading workspace with a ChatGPT-style interface.
+IRRAM AI is a responsive AI-assisted crypto research and paper-trading workspace.
+
+## Deploy on Render
+
+1. Sign in to [Render](https://render.com/).
+2. Choose **New → Blueprint**.
+3. Connect the GitHub repository `jamesbishopemmanuel299-source/irram`.
+4. Render detects `render.yaml` and creates the `irram-ai` web service.
+5. Open the service's **Environment** page and add:
+   - `OPENAI_API_KEY` — your OpenAI API key.
+   - `DERIV_API_TOKEN` — your Deriv personal API token. Use read-only permission only.
+6. Save changes and wait for deployment. Render will provide your live `onrender.com` URL.
+
+The site and its API run on the same Render service. The server serves the dashboard and handles `POST /chat` and `POST /deriv/otp`. API keys are read only from Render environment variables and are never embedded in browser JavaScript.
 
 ## Features
-- Public CoinGecko market quotes and recent price history, with indicative demo quotes if the feed is unavailable.
-- Trading research chat for market summaries, indicator education, strategy process and portfolio review.
-- Interactive watchlist and price chart.
-- Local paper account with buy/sell orders, open positions, realized/unrealized P&L and trade history.
-- Position-size risk calculator.
-- Paper account stored in the browser's local storage.
 
-## Run locally
-Open index.html in a modern browser. No build step or package installation is required.
+- Responsive crypto market dashboard and watchlist.
+- AI market research chat through the server-side OpenAI API.
+- Deriv account balance connection using a temporary WebSocket OTP.
+- Paper trading, portfolio tracking, trade history and risk calculator.
+- Health endpoint at `/health`.
 
-## Publish with GitHub Pages
-The included GitHub Actions workflow publishes the repository root. In repository Settings > Pages, choose GitHub Actions as the build and deployment source.
+## Local development
 
-## Important limitations
-- This is a paper-trading and educational research tool. It does not connect to a broker or place real-money orders.
-- The built-in assistant uses rule-based educational responses; it is not a hosted ChatGPT model. To add a real AI model safely, connect a server-side API endpoint and store provider credentials only as server-side secrets. Never put API keys in browser JavaScript.
-- Public market data may be delayed, rate-limited or unavailable. Fallback quotes are sample values, not live prices.
-- Paper trades are stored locally in the current browser and are not synced across devices.
-- Trading involves risk. Nothing in this app is a personalized investment recommendation.
+Requires Node.js 20 or newer.
 
-## Enable secure live AI chat through GitHub
+```bash
+npm start
+```
 
-The live-chat API key is never placed in the browser or GitHub Pages output. GitHub Actions reads `OPENAI_API_KEY` as a secret and installs it as a Cloudflare Worker secret during deployment. The browser receives only the public Worker URL.
+Open `http://localhost:10000`. Set `OPENAI_API_KEY` and `DERIV_API_TOKEN` in your local environment to enable the corresponding server features.
 
-Add these repository **Actions secrets** in Settings → Secrets and variables → Actions:
+## Security
 
-- `OPENAI_API_KEY` — your OpenAI API key.
-- `DERIV_API_TOKEN` — your Deriv personal API token. Use read-only permissions only; do not grant trade or payment permissions.
-- `CLOUDFLARE_API_TOKEN` — Cloudflare API token with Workers Scripts edit permission.
-- `CLOUDFLARE_ACCOUNT_ID` — your Cloudflare account ID.
+- Never commit API keys or paste them into the website source.
+- Set secrets in Render → your service → Environment.
+- Use a Deriv read-only token. This integration only requests account balance and does not place trades.
+- The dashboard's buy/sell controls are paper trades only.
+- Do not share your Render environment values publicly.
 
-Add this repository **Actions variable** in the same page:
+## GitHub Actions
 
-- `IRRAM_CHAT_API_URL` — your deployed Worker URL, for example `https://irram-ai.YOUR-SUBDOMAIN.workers.dev` (no trailing slash).
-
-The workflow deploys `worker/irram-ai-worker.js` using `worker/wrangler.toml`, stores the OpenAI and Deriv keys as Worker secrets, generates the public endpoint configuration, and deploys GitHub Pages. The Deriv UI sends only the App ID and account ID to the Worker; the Worker uses `DERIV_API_TOKEN` to request the temporary WebSocket session. The token is never sent to the browser. If any required value is missing, deployment stops with a clear error. Never add the API key to `index.html`, `chat-config.js`, or any committed file.
-
-## Connect a Deriv account (read-only)
-The dashboard includes an optional Deriv account connection for live account-balance monitoring. It uses Deriv's authenticated WebSocket OTP flow.
-
-1. Register your application in the Deriv developer portal and copy its App ID.
-2. In Deriv, create a Personal API token with **read-only** permission. Do not enable trade or payment permissions for this connection.
-3. Enter the App ID, your Deriv account ID, and the read-only token in the Deriv panel on IRRAM AI.
-4. Select **Connect Deriv**. The page requests a temporary WebSocket URL from Deriv and subscribes to balance updates.
-5. Select **Disconnect** when finished.
-
-The token is sent directly from the browser to Deriv's OTP endpoint, is cleared from the token input after the request, and is not written to localStorage. Only use this on a trusted device. This integration is deliberately read-only: it does not submit, buy, sell, or close live contracts. The existing IRRAM buy/sell controls remain paper-trading only.
+GitHub Actions performs a Node.js syntax check. Render handles deployment automatically when the repository is connected and auto-deploy is enabled. Cloudflare credentials are no longer required.
