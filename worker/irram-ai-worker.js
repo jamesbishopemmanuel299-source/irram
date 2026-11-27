@@ -11,6 +11,25 @@ export default {
     const headers = cors(env.ALLOWED_ORIGIN || "*");
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers });
     const url = new URL(request.url);
+    if (url.pathname === "/deriv/otp" && request.method === "POST") {
+      if (env.ALLOWED_ORIGIN && origin !== env.ALLOWED_ORIGIN) return Response.json({ error: "Origin not allowed." }, { status: 403, headers });
+      if (!env.DERIV_API_TOKEN) return Response.json({ error: "Deriv API token is not configured on the server." }, { status: 503, headers });
+      try {
+        const body = await request.json();
+        const appId = String(body.appId || "").trim();
+        const accountId = String(body.accountId || "").trim();
+        if (!/^\\d{1,20}$/.test(appId) || !/^[A-Za-z0-9]{3,32}$/.test(accountId)) return Response.json({ error: "A valid Deriv App ID and account ID are required." }, { status: 400, headers });
+        const upstream = await fetch("https://api.derivws.com/trading/v1/options/accounts/" + encodeURIComponent(accountId) + "/otp", {
+          method: "POST",
+          headers: { "Authorization": "Bearer " + env.DERIV_API_TOKEN, "Deriv-App-ID": appId, "Content-Type": "application/json" }
+        });
+        const data = await upstream.json();
+        if (!upstream.ok) return Response.json({ error: data.errors?.[0]?.message || data.error?.message || "Deriv authentication failed." }, { status: upstream.status, headers });
+        return Response.json(data, { headers });
+      } catch {
+        return Response.json({ error: "Unable to create a Deriv session." }, { status: 500, headers });
+      }
+    }
     if (url.pathname !== "/chat" || request.method !== "POST") {
       return Response.json({ error: "Use POST /chat" }, { status: 404, headers });
     }
