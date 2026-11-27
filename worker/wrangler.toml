@@ -1,7 +1,0 @@
-name = "irram-ai"
-main = "irram-ai-worker.js"
-compatibility_date = "2025-01-01"
-
-[vars]
-ALLOWED_ORIGIN = "https://jamesbishopemmanuel299-source.github.io"
-OPENAI_MODEL = "gpt-4o-mini"
