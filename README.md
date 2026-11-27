@@ -23,14 +23,21 @@ The included GitHub Actions workflow publishes the repository root. In repositor
 - Paper trades are stored locally in the current browser and are not synced across devices.
 - Trading involves risk. Nothing in this app is a personalized investment recommendation.
 
-## Enable the real AI assistant (optional)
-The site includes a secure Cloudflare Worker in worker/irram-ai-worker.js. The browser sends chat messages to that Worker; the OpenAI key stays on the server and is never embedded in the website.
+## Enable secure live AI chat through GitHub
 
-1. Create a Cloudflare Worker and deploy worker/irram-ai-worker.js (or use Wrangler).
-2. In the Worker settings, add the secret OPENAI_API_KEY. Optionally add OPENAI_MODEL (default: gpt-4o-mini) and ALLOWED_ORIGIN (the exact published site origin, for example https://jamesbishopemmanuel299-source.github.io).
-3. Open IRRAM AI, choose Connect AI, and paste the Worker URL. The assistant will use the configured AI endpoint. Leave it blank to use local educational research responses.
+The live-chat API key is never placed in the browser or GitHub Pages output. GitHub Actions reads `OPENAI_API_KEY` as a secret and installs it as a Cloudflare Worker secret during deployment. The browser receives only the public Worker URL.
 
-Never put an OpenAI key in the website, GitHub Pages files, or browser storage. Only the public Worker URL belongs in the browser. The Worker restricts cross-origin requests when ALLOWED_ORIGIN is configured.
+Add these repository **Actions secrets** in Settings → Secrets and variables → Actions:
+
+- `OPENAI_API_KEY` — your OpenAI API key.
+- `CLOUDFLARE_API_TOKEN` — Cloudflare API token with Workers Scripts edit permission.
+- `CLOUDFLARE_ACCOUNT_ID` — your Cloudflare account ID.
+
+Add this repository **Actions variable** in the same page:
+
+- `IRRAM_CHAT_API_URL` — your deployed Worker URL, for example `https://irram-ai.YOUR-SUBDOMAIN.workers.dev` (no trailing slash).
+
+The workflow deploys `worker/irram-ai-worker.js` using `worker/wrangler.toml`, stores the OpenAI key as a Worker secret, generates the public endpoint configuration, and deploys GitHub Pages. If any required value is missing, deployment stops with a clear error. Never add the API key to `index.html`, `chat-config.js`, or any committed file.
 
 ## Connect a Deriv account (read-only)
 The dashboard includes an optional Deriv account connection for live account-balance monitoring. It uses Deriv's authenticated WebSocket OTP flow.
